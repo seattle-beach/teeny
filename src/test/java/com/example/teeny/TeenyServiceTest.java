@@ -1,7 +1,9 @@
 package com.example.teeny;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,97 +23,130 @@ import org.springframework.web.client.RestTemplate;
 @WebAppConfiguration
 @IntegrationTest("server.port:0")
 public class TeenyServiceTest {
+
   String url1 = "www.yahoo.com";
   String url1Hash = "" + url1.hashCode();
   String url2 = "www.google.com";
   String url2Hash = "" + url2.hashCode();
-  
+
   @Value("${local.server.port}")
   int port;
   
+  String postUrl;
+  String getUrl;
+  
+  RestTemplate rest = new TestRestTemplate();
+
+  @Before
+  public void setup() {
+    postUrl = "http://localhost:" + port;
+    getUrl = "http://localhost:" + port + "/{id}";
+    rest.delete(postUrl);
+  }
+
   @Test
   public void shouldCreateOneTeeny() {
     MultiValueMap<String, String> vars = new LinkedMultiValueMap<String, String>();
-    String postUrl = "http://localhost:" + port;
     vars.add("url", url1);
-    
-    RestTemplate rest = new TestRestTemplate();
-    ResponseEntity<String> response = rest.postForEntity(postUrl, vars, String.class);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(url1Hash, response.getBody());
+
+    postUrlAndVerifyHash(vars, url1Hash);
   }
 
   @Test
   public void shouldReturnOneTeeny() {
     MultiValueMap<String, String> vars = new LinkedMultiValueMap<String, String>();
 
-    String postUrl = "http://localhost:" + port;
     vars.add("url", url1);
+    postUrlAndVerifyHash(vars, url1Hash);
+    verifyUrl(url1Hash, url1);
+  }
+
+  @Test
+  public void shouldReturnValidCount() {
+    MultiValueMap<String, String> vars = new LinkedMultiValueMap<String, String>();
+    vars.add("url", url1);
+    postUrlAndVerifyHash(vars, url1Hash);
+    verifyCount(rest, postUrl, 1);
+
+    vars.clear();
+    vars.add("url", url2);
+    postUrlAndVerifyHash(vars, url2Hash);
+    verifyCount(rest, postUrl, 2);
+  }
+
+  @Test
+  public void shouldDeleteTeeny() {
+    MultiValueMap<String, String> vars = new LinkedMultiValueMap<String, String>();
+    vars.add("url", url1);
+    postUrlAndVerifyHash(vars, url1Hash);
+    verifyCount(rest, postUrl, 1);
     
-    RestTemplate rest = new TestRestTemplate();
-    ResponseEntity<String> response = rest.postForEntity(postUrl, vars, String.class);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(url1Hash, response.getBody());
+    vars.clear();
+    vars.add("url", url2);
+    postUrlAndVerifyHash(vars, url2Hash);
+    verifyCount(rest, postUrl, 2);
     
-    String getUrl = "http://localhost:" + port + "/{id}" ;
-    response = rest.getForEntity(getUrl, String.class, url1Hash);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(url1, response.getBody());
+    rest.delete(getUrl, url1Hash);
+    verifyCount(rest, postUrl, 1);
+    
+    rest.delete(getUrl, url2Hash);
+    verifyCount(rest, postUrl, 0);
   }
   
   @Test
   public void shouldAdd2TeenyAndReturnValidTeeny() {
-    RestTemplate rest = new TestRestTemplate();
-    String postUrl = "http://localhost:" + port;
-    
     MultiValueMap<String, String> vars = new LinkedMultiValueMap<String, String>();
     vars.add("url", url1);
-    ResponseEntity<String> response = rest.postForEntity(postUrl, vars, String.class);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(url1Hash, response.getBody());
-    
+    postUrlAndVerifyHash(vars, url1Hash);
+
     vars.clear();
     vars.add("url", url2);
-    response = rest.postForEntity(postUrl, vars, String.class);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(url2Hash, response.getBody());
-    
-    String getUrl = "http://localhost:" + port + "/{id}" ;
-    response = rest.getForEntity(getUrl, String.class, url1Hash);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(url1, response.getBody());
+    postUrlAndVerifyHash(vars, url2Hash);
 
-    response = rest.getForEntity(getUrl, String.class, url2Hash);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(url2, response.getBody());
-    
+    verifyUrl(url1Hash, url1);
+    verifyUrl(url2Hash, url2);
+
     assertNotEquals(url2, url1);
   }
-  
+
   @Test
   public void shouldAllowDuplicateEntry() {
     MultiValueMap<String, String> vars = new LinkedMultiValueMap<String, String>();
-    RestTemplate rest = new TestRestTemplate();
-    
-    String postUrl = "http://localhost:" + port;
     vars.add("url", url1);
-    
-    ResponseEntity<String> response = rest.postForEntity(postUrl, vars, String.class);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(url1Hash, response.getBody());
-    
-    response = rest.postForEntity(postUrl, vars, String.class);
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(url1Hash, response.getBody());
+
+    postUrlAndVerifyHash(vars, url1Hash);
+    verifyCount(rest, postUrl, 1);
+
+    postUrlAndVerifyHash(vars, url1Hash);
+    verifyCount(rest, postUrl, 1);
   }
-  
+
   @Test
-  public void getShouldNotFail() {
+  public void emptyMapShouldNotFail() {
     String getUrl = "http://localhost:" + port;
-    
+
     RestTemplate rest = new TestRestTemplate();
     ResponseEntity<String> response = rest.getForEntity(getUrl, String.class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals("[\"Popular urls\"]", response.getBody());
+    assertEquals("[]", response.getBody());
+  }
+  
+  private void postUrlAndVerifyHash(MultiValueMap<String, String> vars, String hash) {
+    ResponseEntity<String> response = rest.postForEntity(postUrl, vars, String.class);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(hash, response.getBody());
+  }
+
+  private void verifyUrl(String hash, String url) {
+    ResponseEntity<String> response = rest.getForEntity(getUrl, String.class, hash);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(url, response.getBody());
+  }
+
+  private void verifyCount(RestTemplate rest, String postUrl, int count) {
+    ResponseEntity<String> response;
+    response = rest.getForEntity(postUrl + "/?verbose={verbose}", String.class, "false");
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals("[\"" + count + "\"]", response.getBody());
   }
 }

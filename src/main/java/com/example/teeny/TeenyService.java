@@ -1,5 +1,8 @@
 package com.example.teeny;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.boot.SpringApplication;
@@ -32,18 +35,32 @@ public class TeenyService {
   }
 
   @RequestMapping(value = "{hash}", method = RequestMethod.DELETE)
-  String deleteTeeny(@PathVariable String hash) {
+  void deleteTeeny(@PathVariable String hash) {
     Teeny teeny = map.remove(hash);
     if (teeny == null) {
       throw TeenyNotFoundException.ERROR;
     }
-    return teeny.getUrl();
   }
 
+  @RequestMapping(value = "/", method = RequestMethod.DELETE)
+  void clearTeeny() {
+    map.clear();
+  }
+  
   @RequestMapping(value = "/", method = RequestMethod.GET)
-  String[] orderAndListTeeny() {
-    // TODO
-    return new String[] { "Popular urls" };
+  List<String> orderAndListTeeny(
+      @RequestParam(value = "verbose", defaultValue = "true", required = false) boolean verbose) {
+    List<String> result = new ArrayList<>();
+    
+    if (!verbose) {
+      result.add("" + map.size());
+    } else {
+      for (Entry<String, Teeny> entry : map.entrySet()) {
+        result.add(entry.getKey() + " :: "+ entry.getValue().getUrl());
+      }
+    }
+    
+    return result;
   }
 
   public static void main(String[] args) throws Exception {
