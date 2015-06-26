@@ -1,7 +1,5 @@
 package com.example.teeny;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,8 +19,8 @@ public class TeenyService {
   @RequestMapping(value = "/", method = RequestMethod.POST)
   String createTeeny(@RequestParam(value = "url") String url) {
     Teeny teeny = Teeny.createTeeny(url);
-    map.put(teeny.getString(), teeny);
-    return teeny.getString();
+    map.put(teeny.getId(), teeny);
+    return teeny.getId();
   }
 
   @RequestMapping("{hash}")
@@ -46,24 +44,34 @@ public class TeenyService {
   void clearTeeny() {
     map.clear();
   }
-  
+
   @RequestMapping(value = "/", method = RequestMethod.GET)
-  List<String> orderAndListTeeny(
-      @RequestParam(value = "verbose", defaultValue = "true", required = false) boolean verbose) {
-    List<String> result = new ArrayList<>();
-    
+  Object orderAndListTeeny(@RequestParam(value = "verbose", defaultValue = "true", required = false) boolean verbose) {
+
     if (!verbose) {
-      result.add("" + map.size());
-    } else {
-      for (Entry<String, Teeny> entry : map.entrySet()) {
-        result.add(entry.getKey() + " :: "+ entry.getValue().getUrl());
-      }
+      Meta meta = new Meta();
+      meta.count = map.size();
+      return meta;
     }
-    
+
+    Teeny[] result = new Teeny[map.size()];
+    int i = 0;
+    for (Entry<String, Teeny> entry : map.entrySet()) {
+      result[i++] = entry.getValue();
+    }
+
     return result;
   }
 
   public static void main(String[] args) throws Exception {
     SpringApplication.run(TeenyService.class, args);
+  }
+
+  public static class Meta {
+    private int count;
+
+    public int getCount() {
+      return count;
+    }
   }
 }

@@ -18,6 +18,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.teeny.TeenyService.Meta;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = TeenyService.class)
 @WebAppConfiguration
@@ -31,10 +33,10 @@ public class TeenyServiceTest {
 
   @Value("${local.server.port}")
   int port;
-  
+
   String postUrl;
   String getUrl;
-  
+
   RestTemplate rest = new TestRestTemplate();
 
   @Before
@@ -75,24 +77,44 @@ public class TeenyServiceTest {
   }
 
   @Test
+  public void shouldListAllTeeny() {
+    
+    MultiValueMap<String, String> vars = new LinkedMultiValueMap<String, String>();
+    vars.add("url", url1);
+    postUrlAndVerifyHash(vars, url1Hash);
+    ResponseEntity<Teeny[]> response;
+    response = rest.getForEntity(postUrl, Teeny[].class, "false");
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(1, response.getBody().length);
+    assertEquals(url1, response.getBody()[0].getUrl());
+    
+    vars.clear();
+    vars.add("url", url2);
+    postUrlAndVerifyHash(vars, url2Hash);
+    response = rest.getForEntity(postUrl, Teeny[].class, "false");
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(2, response.getBody().length);
+  }
+  
+  @Test
   public void shouldDeleteTeeny() {
     MultiValueMap<String, String> vars = new LinkedMultiValueMap<String, String>();
     vars.add("url", url1);
     postUrlAndVerifyHash(vars, url1Hash);
     verifyCount(rest, postUrl, 1);
-    
+
     vars.clear();
     vars.add("url", url2);
     postUrlAndVerifyHash(vars, url2Hash);
     verifyCount(rest, postUrl, 2);
-    
+
     rest.delete(getUrl, url1Hash);
     verifyCount(rest, postUrl, 1);
-    
+
     rest.delete(getUrl, url2Hash);
     verifyCount(rest, postUrl, 0);
   }
-  
+
   @Test
   public void shouldAdd2TeenyAndReturnValidTeeny() {
     MultiValueMap<String, String> vars = new LinkedMultiValueMap<String, String>();
@@ -130,7 +152,7 @@ public class TeenyServiceTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("[]", response.getBody());
   }
-  
+
   private void postUrlAndVerifyHash(MultiValueMap<String, String> vars, String hash) {
     ResponseEntity<String> response = rest.postForEntity(postUrl, vars, String.class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -144,9 +166,9 @@ public class TeenyServiceTest {
   }
 
   private void verifyCount(RestTemplate rest, String postUrl, int count) {
-    ResponseEntity<String> response;
-    response = rest.getForEntity(postUrl + "/?verbose={verbose}", String.class, "false");
+    ResponseEntity<Meta> response;
+    response = rest.getForEntity(postUrl + "/?verbose={verbose}", Meta.class, "false");
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals("[\"" + count + "\"]", response.getBody());
+    assertEquals(count, response.getBody().getCount());
   }
 }
