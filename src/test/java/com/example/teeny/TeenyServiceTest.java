@@ -61,6 +61,11 @@ public class TeenyServiceTest {
     vars.add("url", url1);
     postUrlAndVerifyHash(vars, url1Hash);
     verifyUrl(url1Hash, url1);
+    
+    ResponseEntity<Teeny[]> response = rest.getForEntity(postUrl, Teeny[].class);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(1, response.getBody().length);
+    assertEquals(1, response.getBody()[0].getPopularity());
   }
 
   @Test
@@ -78,12 +83,10 @@ public class TeenyServiceTest {
 
   @Test
   public void shouldListAllTeeny() {
-    
     MultiValueMap<String, String> vars = new LinkedMultiValueMap<String, String>();
     vars.add("url", url1);
     postUrlAndVerifyHash(vars, url1Hash);
-    ResponseEntity<Teeny[]> response;
-    response = rest.getForEntity(postUrl, Teeny[].class, "false");
+    ResponseEntity<Teeny[]> response = rest.getForEntity(postUrl, Teeny[].class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(1, response.getBody().length);
     assertEquals(url1, response.getBody()[0].getUrl());

@@ -29,6 +29,7 @@ public class TeenyService {
     if (teeny == null) {
       throw TeenyNotFoundException.ERROR;
     }
+    teeny.incrementPopularity();
     return teeny.getUrl();
   }
 
