@@ -27,9 +27,9 @@ import com.example.teeny.TeenyService.Meta;
 public class TeenyServiceTest {
 
   String url1 = "www.yahoo.com";
-  String url1Hash = "" + url1.hashCode();
+  String url1Hash = Integer.toString(url1.hashCode(), 36);
   String url2 = "www.google.com";
-  String url2Hash = "" + url2.hashCode();
+  String url2Hash = Integer.toString(url2.hashCode(), 36).substring(1);
 
   @Value("${local.server.port}")
   int port;

@@ -15,7 +15,9 @@ public class Teeny {
   
   public Teeny(String url) {
     this.url = url;
-    this.id = "" + url.hashCode();
+    int hash = url.hashCode();
+    hash = hash < 0 ? hash * -1 : hash;
+    this.id = Integer.toString(hash, 36);
   }
   
   public String getId() {
