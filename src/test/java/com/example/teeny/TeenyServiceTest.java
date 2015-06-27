@@ -52,6 +52,7 @@ public class TeenyServiceTest {
     vars.add("url", url1);
 
     postUrlAndVerifyHash(vars, url1Hash);
+    verifyUrl(url1Hash, url1);
   }
 
   @Test

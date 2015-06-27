@@ -9,15 +9,22 @@ public class Teeny {
   final AtomicInteger popularity = new AtomicInteger();
 
   public Teeny() {
-    this.id = null;
-    this.url = null;
+    this(null);
   }
 
   public Teeny(String url) {
+    this(url, 0);
+  }
+
+  public Teeny(String url, int count) {
+    if (url == null) {
+      return;
+    }
     this.url = url;
     int hash = url.hashCode();
     hash = hash < 0 ? hash * -1 : hash;
     this.id = Integer.toString(hash, 36);
+    this.popularity.set(count);
   }
 
   public String getId() {
@@ -31,7 +38,7 @@ public class Teeny {
   public int getPopularity() {
     return popularity.intValue();
   }
-  
+
   public void incrementPopularity() {
     popularity.incrementAndGet();
   }
