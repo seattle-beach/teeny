@@ -36,6 +36,16 @@ And start the client application with:
 
 ```java -jar /teeny/target/teeny-0.1-SNAPSHOT.war```
 
+
+##  Creating Apache Geode regions
+
+With the cluster up and running execute:
+
+```docker exec -it $(docker ps |grep -i locator|awk '{print $1}') data/setup.sh```
+
+This is going to grab the container ID for the current locator instance and execute a shell script inside the container. The shell script will create both regions required for the application.
+
+
 ## Calling the application
 1. To create a teeny
 ``` curl -X POST http://localhost:8080?url=yahoo.com ```
