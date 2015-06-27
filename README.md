@@ -19,21 +19,16 @@ Then install docker-compose with ```sudo pip install -U docker-compose```
 ##  Building and running the application
 
 1. Start Apache Geode cluster 
-
-You can either do it using GFSH or through Docker. 
-
-``` docker-compose up ```
-
-If you are using Docker on this step it may take a while depending on your internet connection.
-
-1. Create the teeny client container:
-
-```docker build .```
+  * You can either do it using GFSH or through Docker. 
+  ``` docker-compose up ```
+  If you are using Docker on this step it may take a while depending on your internet connection.
+2. Create the teeny client container:
+  ```docker build -t geode/teeny-client .```
 
 This step will clone this repository and build the application, which consists 
 of a SpringBoot application that has a single Servlet. 
 
-Otherwhise for running locally without Docker clone this repository and build an executable jar.
+Otherwhise if you're running locally without Docker, clone this repository and build an executable jar:
 
 ``` mvn clean package ``` 
 
@@ -50,7 +45,6 @@ And start the client application with:
 ``` curl -X DELETE http://localhost:8080/<return_value_from_create> ```
 1. To list of most poplular teenyies 
 ``` curl http://localhost:8080 ```
-
 
 ## Scale using Docker & Apache Geode (incubating)
 
