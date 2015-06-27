@@ -1,5 +1,5 @@
 # teeny
-Teeny is an Apache Geode (incubating) based URL shortner application.
+Teeny is an [Apache Geode (incubating)](geode.incubator.apache.org) based URL shortner application.
 
 This application is intended to server as an introduction to Apache Geode basic concepts.
 
@@ -12,7 +12,7 @@ This application is intended to server as an introduction to Apache Geode basic 
 * Docker & Compose
 
 On Linux use package managers available for most distributions.  
-On Mac use boot2docker or [Kitematic](https://kitematic.com/)
+On Mac use [boot2docker](boot2docker.io) or [Kitematic](https://kitematic.com/)
 
 Then install docker-compose with ```sudo pip install -U docker-compose```
 
@@ -52,7 +52,7 @@ And start the client application with:
 ``` curl http://localhost:8080 ```
 
 
-## Scale the application using Docker compose
+## Scale using Docker & Apache Geode (incubating)
 
 Given that it's easy to scale an Apache Geode cluster you can easily leverage docker-compose functionalities to add more containers and more nodes to any component of the solution.
 
