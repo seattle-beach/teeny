@@ -14,7 +14,7 @@ locator:
    - "7070:7070"
   volumes:
    - scripts/:/data/
-  command: /data/gfshWrapper.sh gfsh start locator --J="-Dgemfire.jmx-manager-hostname-for-clients=192.168.99.100" --hostname-for-clients=192.168.99.100 --name=locator --mcast-port=0 
+  command: /data/gfshWrapper.sh gfsh start locator --J="-Dgemfire.jmx-manager-hostname-for-clients=192.168.99.100" --hostname-for-clients=192.168.99.100 --name=locator --mcast-port=0
 
 client:
   image: geode/teeny-client
@@ -41,6 +41,7 @@ server:
    - "1099"
   ports:
    - "40404"
+   - "8080"
   volumes:
    - scripts/:/data/
-  command: /data/startServer.sh --hostname-for-clients=192.168.99.100 --max-heap=1G
+  command: /data/startServer.sh --J=-Dgemfire.start-dev-rest-api=true --J=-Dgemfire.http-service-port=8080 --hostname-for-clients=192.168.99.100 --max-heap=1G

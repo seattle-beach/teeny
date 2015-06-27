@@ -57,3 +57,11 @@ For instance in order to add more instances of the teeny client just execute:
 To add more Apache Geode servers:
 
 ```docker-compose scale server=2 ```
+
+## Accessing Apache Geode RESTful API
+
+You can reach Swagger interace that's part of Geode REST service using the following URL:
+
+http://192.168.99.100:32788/gemfire-api/docs/index.html
+
+
